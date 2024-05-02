@@ -48,6 +48,7 @@ class Cli(object):
 
     def __init__(
         self,
+        profile,
         endpoint=None,
         working_dir=None,
         ps1=None,
@@ -58,7 +59,7 @@ class Cli(object):
         self.ps1 = ps1 or Cli.DEFAULT_PS1
         self.current_path = paths.S3Path.from_path(working_dir or "/")
 
-        self.client = client.S3Client(endpoint=endpoint)
+        self.client = client.S3Client(endpoint=endpoint, profile=profile)
 
         if bookmark_file:
             self.bookmarks = bookmarks.BookmarkManager(bookmark_file)
@@ -391,6 +392,12 @@ def configure_debug_logging():
 def main():
     parser = argparse.ArgumentParser("s3-browser")
     parser.add_argument(
+        "--profile",
+        dest="profile",
+        type=str,
+        default="default",
+    )  # behavior change to require AWS_SHARED_CREDENTIALS file and override IAM role (if any)
+    parser.add_argument(
         "-p",
         "--prompt",
         dest="prompt",
@@ -446,6 +453,7 @@ def main():
         ps1=args.prompt,
         history_file=args.history_file,
         bookmark_file=args.bookmark_file,
+        profile=args.profile,
     ).read_loop()
 
 

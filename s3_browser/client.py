@@ -16,8 +16,9 @@ class S3Client(object):
     API
     """
 
-    def __init__(self, endpoint=None):
-        self.boto = boto3.client("s3", endpoint_url=endpoint)
+    def __init__(self, endpoint=None, profile='default'):
+        session = boto3.Session(profile_name=profile)
+        self.boto = session.client("s3", endpoint_url=endpoint)
         self.path_cache = {}
         self.mime_typer = magic.Magic(mime=True)
 
