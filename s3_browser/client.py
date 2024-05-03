@@ -145,7 +145,7 @@ class S3Client(object):
         self.boto.delete_object(Bucket=path.bucket, Key=path.path)
         self.invalidate_cache(path)
 
-    def put(self, f, dest):
+    def put(self, f, dest, kms_key):
         """Write a file to an S3Path"""
         content_type = self.mime_typer.from_file(f)
         logger.debug("Uploading %s to %s with content-type %s", f, dest, content_type)
@@ -154,7 +154,9 @@ class S3Client(object):
             Filename=f,
             Bucket=dest.bucket,
             Key=dest.path,
-            ExtraArgs={"ContentType": content_type},
+            ExtraArgs={"ContentType": content_type,
+                       "ServerSideEncryption": "aws:kms",
+                       "SSEKMSKeyId": kms_key},
         )
 
         self.invalidate_cache(dest)

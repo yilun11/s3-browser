@@ -171,6 +171,7 @@ class Cli(object):
         parser = SafeParser("put")
         parser.add_argument("local_file", help="Local file to upload to S3")
         parser.add_argument("s3_key", nargs=1, help="S3 key at which to write the file")
+        parser.add_argument("kms_key", nargs=1, help="KMS key e.g. /alias/fnma/app/drpgvu")
         args = parser.parse_args(args)
 
         if parser.exited:
