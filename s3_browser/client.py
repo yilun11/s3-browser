@@ -156,7 +156,7 @@ class S3Client(object):
             Key=dest.path,
             ExtraArgs={"ContentType": content_type,
                        "ServerSideEncryption": "aws:kms",
-                       "SSEKMSKeyId": kms_key},
+                       "SSEKMSKeyId": kms_key[0]},
         )
 
         self.invalidate_cache(dest)
