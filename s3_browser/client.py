@@ -149,14 +149,17 @@ class S3Client(object):
         """Write a file to an S3Path"""
         content_type = self.mime_typer.from_file(f)
         logger.debug("Uploading %s to %s with content-type %s", f, dest, content_type)
-
+        if kms_key is None:
+            str_extra = {"ContentType": content_type}
+        else:
+            str_extra = {"ContentType": content_type,
+                        "ServerSideEncryption": "aws:kms",
+                        "SSEKMSKeyId": kms_key[0]}
         self.boto.upload_file(
             Filename=f,
             Bucket=dest.bucket,
             Key=dest.path,
-            ExtraArgs={"ContentType": content_type,
-                       "ServerSideEncryption": "aws:kms",
-                       "SSEKMSKeyId": kms_key[0]},
+            ExtraArgs=str_extra,
         )
 
         self.invalidate_cache(dest)
