@@ -169,15 +169,29 @@ class Cli(object):
 
     def put(self, *args):
         parser = SafeParser("put")
-        parser.add_argument("local_file", help="Local file to upload to S3")
-        parser.add_argument("s3_key", nargs=1, help="S3 key at which to write the file")
+        parser.add_argument("local_file", help="Local file to upload to S3. Dir/* also supported but filenames must have extensions!")
+        parser.add_argument("s3_key", nargs=1, help="S3 key at which to write the file. If using dir/*, use .")
         parser.add_argument("--kms_key", nargs=1, help="Optional KMS key for 1.0 e.g. alias/fnma/app/drpgvu", default=None)
         args = parser.parse_args(args)
 
         if parser.exited:
             return
-
-        self.client.put(args.local_file, self.normalise_path(args.s3_key), args.kms_key)
+        
+        if "*" in args.local_file:
+            from_files = glob.glob(f"{os.path.dirname(args.local_file)}/**/*.*", recursive=True)
+                for filename in from_files:
+                    s3_key = self.normalise_path(filename)
+                    print(f"Putting {filename} in as {s3_key}")
+                answer = input("Press y to continue to any other button to cancel")
+                if answer.lower()[0] == 'y':
+                    print("Continuing put.")
+                    for filename in from_files:
+                        s3_key = self.normalise_path(filename)
+                        self.client.put(filename, s3_key, args.kms_key)
+                else:
+                    print("Canceling put.")
+        else:
+            self.client.put(args.local_file, self.normalise_path(args.s3_key), args.kms_key)
 
     def get(self, *args):
         parser = SafeParser("get")
